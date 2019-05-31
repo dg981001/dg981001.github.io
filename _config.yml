@@ -1,0 +1,67 @@
+title: LK's Blog
+email: dg981001@gmail.com
+description: |
+  Create new idea!
+  물리와 수학을 복전하며 프로그래밍을 공부하는 사범대생
+baseurl: ''
+url: 'https://lk-lab.github.com'
+timezone: Asia/Seoul 
+
+repository: LK-LAB/lk-lab.github.io
+
+permalink: /:year/:month/:day/:title/
+
+excerpt_separator: <!--more-->
+
+markdown: kramdown
+
+krandown:
+  input: GFM
+  highlighter: rouge
+
+plugins:
+  - jekyll-paginate
+
+paginate: 5
+paginate_path: '/page/:num/'
+
+collections:
+  authors:
+    output: true
+    permalink: /authors/:path/
+  tags:
+    output: true
+    permalink: /tags/:path/
+
+defaults:
+  - scope:
+      path: ''
+      type: authors
+    values:
+      layout: author
+  - scope:
+      path: ''
+      type: tags
+    values:
+      layout: tag
+
+exclude: [README.md, Gemfile, Gemfile.lock]
+
+keep_files: [assets, files]
+github: [metadata]
+# iolo's custom
+author: dg981001@naver.com
+image: '/assets/images/default_blog_cover.jpg'
+asset_url: /assets
+
+google_analytics:
+  ua: 
+facebook:
+  app_id: 
+  username: 
+twitter:
+  username: 
+google_plus:
+  username: 
+github_url:
+  username: LK-LAB
