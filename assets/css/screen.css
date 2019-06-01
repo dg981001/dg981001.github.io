@@ -27,7 +27,7 @@ pre,
 code,
 tt,
 kbd {
-    font-family: monospace;
+    font-family: sans-serif;
     font-weight: 300;
 }
 
@@ -37,7 +37,8 @@ code.highlighter-rouge {
   padding-bottom: 0.2em;
   margin: 0;
   font-size: 85%;
-  background-color: rgba(27,31,35,0.05);
+  background-color: #f9f9f9;
+  /* rgba(27,31,35,0.05); */
   border-radius: 3px;
 }
 
@@ -896,10 +897,10 @@ body.tag-template #navbar {
 }
 
 #post-content blockquote {
-    margin: 28px 0;
-    padding: 28px;
-    border-left: 3px solid #84f7ff;
-    background-color: #f9f9f9
+    margin: 10px 0;
+    padding: 15px 22px;
+    border-left: 3px solid #d9e8bb;
+    background-color: #f9f9f9;
 }
 
 #post-content blockquote > *:first-child {
