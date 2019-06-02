@@ -58,11 +58,11 @@ image: /files/covers/post/mathematics.jpg
 > * $\mathcal{T}_T = \{\varnothing ,X\}$ : 비이산 위상, 당연 위상
 > * $$\mathcal{T}_f = \{U\mid X-U$$가 유한집합이거나 $$X - U = X\}$$ : 여유한 위상(finite complement)
 >> $$(\because)$$ $$\mathcal{T}_f$$가 $X$의 위상인 이유  
->> (ⅰ) $X - X = \varnothing$, $X - \varnothing = X$ 이므로  $$\varnothing, X\in \mathcal{T}_f$$  
->> (ⅱ) $$\mathcal{T}_f$$의 공집합이 아닌 원소들의 첨수족 $$\{U_\alpha\}_{\alpha\in\mathcal{A}}$$에 대하여  
->> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $$X - \bigcup \limits_{\alpha\in\mathcal{A}}U_{\alpha}$$ $$ = $$ $$X \cap (\bigcup \limits_{\alpha\in\mathcal{A}}U_{\alpha})^c$$ $$ = $$ $$\bigcap \limits_{\alpha\in\mathcal{A}}(X - U_{\alpha})$$ 이 유한집합  
->> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 따라서 $$\forall\alpha\in\mathcal{A}$$, $$U_{\alpha}\in\mathcal{T}_f \to \bigcup \limits_{\alpha\in\mathcal{A}} U_{\alpha} \in \mathcal{T}_f$$이다  
->> (ⅲ)
+>> &nbsp;&nbsp; ⅰ. $X - X = \varnothing$, $X - \varnothing = X$ 이므로  $$\varnothing, X\in \mathcal{T}_f$$  
+>> &nbsp;&nbsp; ⅱ. $$\mathcal{T}_f$$의 공집합이 아닌 원소들의 첨수족 $$\{U_\alpha\}_{\alpha\in\mathcal{A}}$$에 대하여  
+>> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $$X - \bigcup \limits_{\alpha\in\mathcal{A}}U_{\alpha}$$ $$ = $$ $$X \cap (\bigcup \limits_{\alpha\in\mathcal{A}}U_{\alpha})^c$$ $$ = $$ $$\bigcap \limits_{\alpha\in\mathcal{A}}(X - U_{\alpha})$$ 이 유한집합이다  
+>> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 따라서 $$\forall\alpha\in\mathcal{A}$$, $$U_{\alpha}\in\mathcal{T}_f \to \bigcup \limits_{\alpha\in\mathcal{A}} U_{\alpha} \in \mathcal{T}_f$$이다  
+>> &nbsp;&nbsp; ⅲ.
 
 
 
