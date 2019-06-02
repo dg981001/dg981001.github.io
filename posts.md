@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Posts
-image: /files/covers/openapi.png
+image: /files/covers/posts-cover.jpg
 permalink: /posts/
 sitemap: yes
 excerpt: 글 목록

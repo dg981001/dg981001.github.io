@@ -2,20 +2,7 @@
 <html>
 <head>
     {% include head.html %}
-    <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({
-            tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
-            extensions: ["[Contrib]/a11y/accessibility-menu.js"],
-            menuSettings: {
-                collapsible: true,
-                autocollapse: true,
-                explorer: true
-            }
-        });
-    </script>
-    <<script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
+    {% include mathjax.html %}
 </head>
 
 <body class="{{ page.layout | append: '-template' }}">

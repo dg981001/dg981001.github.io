@@ -2,6 +2,7 @@
 layout: page
 title: Tags
 permalink: /tags/
+image: /files/covers/tags-cover.jpg
 sitemap:
   priority: 0.7
 ---

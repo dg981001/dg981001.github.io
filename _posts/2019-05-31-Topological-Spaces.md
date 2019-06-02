@@ -5,7 +5,7 @@ author: LK
 date: 2019-05-31 12:00
 tags: [topology,mathematics]
 mathjax: false
-#image: /files/covers/kubernetes.png
+image: /files/covers/post/mathematics.jpg
 ---
 
 위상수학의 첫 번째 정리

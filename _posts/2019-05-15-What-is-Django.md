@@ -1,10 +1,10 @@
 ---
 layout: post
-title: '#Django Django란?(미완)'
+title: 'Django Django란?(미완)'
 author: LK
 date: 2019-05-30 12:00
 tags: [python,django]
-#image: /files/covers/kubernetes.png
+image: /files/covers/post/django-logo.png
 ---
 
 요즘 웹 프로그래밍을 공부하는 저를 포함하는 많은 사람들이 Django를 이용하여 웹사이트를 개발합니다.
