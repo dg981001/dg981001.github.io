@@ -1,0 +1,94 @@
+# _data/boss_data.yml
+---
+
+군단장 레이드:
+  발탄:
+    party_size: [8]
+    difficulties:
+      노말:
+        hp: 248
+      하드:
+        hp: 667
+  비아키스:
+    party_size: [8]
+    difficulties:
+      노말:
+        hp: 400   # 추정치
+      하드:
+        hp: 800   # 추정치
+  쿠크세이튼:
+    party_size: [8]
+    difficulties:
+      노말:
+        hp: 297
+      하드:
+        hp: 594
+
+카제로스 레이드:
+  '1막':
+    party_size: [8]
+    difficulties:
+      노말:
+        hp:
+          '1관문': 1615
+          '2관문': 2132
+      하드:
+        hp:
+          '1관문': 2698
+          '2관문': 3986
+  '2막':
+    party_size: [8]
+    difficulties:
+      노말:
+        hp:
+          '1관문': 2754
+          '2관문': 3994
+      하드:
+        hp:
+          '1관문': 5161
+          '2관문': 8255
+  '3막':
+    party_size: [8]
+    difficulties:
+      노말:
+        hp:
+          '1관문': 3687
+          '2관문': 3346
+          '3관문': 7319
+      하드:
+        hp:
+          '1관문': 6524
+          '2관문': 6631
+          '3관문': 15805
+
+어비스 레이드:
+  어비스 레이드 A:
+    party_size: [8]
+    difficulties:
+      노말:
+        hp: 5000
+      익스트림:
+        hp: 7500
+  어비스 레이드 B:
+    party_size: [8]
+    difficulties:
+      노말:
+        hp: 6000
+      익스트림:
+        hp: 9000
+
+어비스 던전:
+  던전 A:
+    party_size: [4]
+    difficulties:
+      노말:
+        hp: 200
+      헬:
+        hp: 400
+  던전 B:
+    party_size: [8]
+    difficulties:
+      노말:
+        hp: 300
+      익스트림:
+        hp: 600

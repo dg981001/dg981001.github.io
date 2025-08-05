@@ -1,0 +1,261 @@
+<!-- _includes/contribution_calculator.html -->
+<div id="calculator-container">
+  <h2>보스 선택</h2>
+  <select id="raid-select"><option>레이드 선택</option></select>
+  <select id="difficulty-select"><option>난이도 선택</option></select>
+  <select id="gate-select"><option>관문 선택</option></select>
+
+  <h2>직접 입력</h2>
+  보스 체력(억): <input id="boss-hp" type="number"><br>
+  파티 인원:
+  <select id="party-size">
+    <option>4인</option><option>8인</option><option>16인</option>
+  </select><br>
+  입힌 데미지(억): <input id="user-damage" type="number"><br>
+
+  <button id="calculate-btn">계산하기</button>
+  <button id="threshold-btn">기준점 보기</button>
+
+  <div id="result-area" style="display:none;"></div>
+  <div id="threshold-area" style="display:none;"></div>
+</div>
+
+<script id="boss-data" type="application/json">
+  {{ site.data.boss_data | jsonify }}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 1. 데이터 파싱 및 요소 참조
+  let bossData = {};
+  try {
+    bossData = JSON.parse(document.getElementById('boss-data').textContent);
+  } catch (e) {
+    console.error('bossData parsing error:', e);
+  }
+  const raidSel      = document.getElementById('raid-select');
+  const diffSel      = document.getElementById('difficulty-select');
+  const gateSel      = document.getElementById('gate-select');
+  const hpInput      = document.getElementById('boss-hp');
+  const partySel     = document.getElementById('party-size');
+  const dmgInput     = document.getElementById('user-damage');
+  const calculateBtn = document.getElementById('calculate-btn');
+  const thresholdBtn = document.getElementById('threshold-btn');
+  const resultArea   = document.getElementById('result-area');
+  const thresholdArea= document.getElementById('threshold-area');
+
+  // 2. 레이드 목록 초기화
+  Object.keys(bossData).forEach(function(raid) {
+    const opt = document.createElement('option');
+    opt.value = raid; opt.innerText = raid;
+    raidSel.appendChild(opt);
+  });
+
+  // 3. 함수 정의
+  function updateDifficulties() {
+    diffSel.innerHTML = '<option>난이도 선택</option>';
+    gateSel.innerHTML = '<option>관문 선택</option>';
+    const raid = raidSel.value;
+    if (!bossData[raid]) return;
+    Object.keys(bossData[raid]).forEach(function(diff) {
+      const opt = document.createElement('option');
+      opt.value = diff; opt.innerText = diff;
+      diffSel.appendChild(opt);
+    });
+  }
+
+  function updateGates() {
+    gateSel.innerHTML = '<option>관문 선택</option>';
+    const raid = raidSel.value;
+    const diff = diffSel.value;
+    if (!bossData[raid] || !bossData[raid][diff]) return;
+    bossData[raid][diff].forEach(function(g) {
+      const opt = document.createElement('option');
+      opt.value = g.hp; opt.innerText = g.gate + ' (' + g.hp + '억)';
+      gateSel.appendChild(opt);
+    });
+  }
+
+  function updateHp() {
+    hpInput.value = gateSel.value;
+  }
+
+  function calculateContribution() {
+    const hp  = parseFloat(hpInput.value) * 1e8;
+    const dmg = parseFloat(dmgInput.value) * 1e8;
+    const party = parseInt(partySel.value);
+    if (!hp || !dmg) return alert('모든 값을 입력하세요.');
+    const pct = dmg/hp*100;
+    const thr = {4:{투사:[0,29],강직한_투사:[30,39],잔혹한_혈투사:[40,100]},
+                 8:{투사:[0,14],강직한_투사:[15,19],잔혹한_혈투사:[20,100]},
+                 16:{투사:[0,7],강직한_투사:[8,10],잔혹한_혈투사:[11,100]}};
+    let grade = '해당 없음';
+    Object.entries(thr[party]||{}).some(function([k,r]) {
+      if (pct>=r[0]&&(r[1]===100||pct<r[1])) { grade = k.replace(/_/g,' '); return true; }
+    });
+    resultArea.innerHTML = '<h3>결과</h3>기여도: '+pct.toFixed(2)+'%<br>등급: <strong>'+grade+'</strong>';
+  resultArea.style.display = 'block';        // 보여주기
+  //thresholdArea.style.display = 'none';      // 기준점 숨기기
+  }
+
+  function showThresholds() {
+  const hpVal = parseFloat(hpInput.value);
+  const party = parseInt(partySel.value);
+  const raid = raidSel.value;
+  const diff = diffSel.value;
+  const gate = gateSel.value;
+
+  if (!raid || !diff || !gate) {
+    alert('레이드, 난이도, 관문을 모두 선택하세요.');
+    return;
+  }
+  if (!hpVal) return alert('보스 체력을 입력하세요.');
+
+  const hp = hpVal * 1e8;
+  const thrList = {
+    4: [['투사',0,29],['강직한 투사',30,39],['잔혹한 혈투사',40,100]],
+    8: [['투사',0,14],['강직한 투사',15,19],['잔혹한 혈투사',20,100]],
+    16: [['투사',0,7],['강직한 투사',8,10],['잔혹한 혈투사',11,100]]
+  }[party] || [];
+
+  // 타이틀 라인 추가
+  let html = `<h3>기준점 : ${raid} / ${diff} / ${gate}관문 / ${party}인 / ${hpVal.toLocaleString()}억</h3>`;
+  html += '<table><tr><th>등급</th><th>퍼센트</th><th>데미지(억)</th></tr>';
+
+  thrList.forEach(function(r) {
+  const [label, min, max] = r;
+  const minD = (hp * min / 100 / 1e8).toFixed(2);
+  let percentRange, maxD;
+
+  if (max === 100) {
+    percentRange = `${min}%~${max}%`;
+    maxD = hpVal.toLocaleString();  // 보스 최대 체력(억)
+  } else {
+    percentRange = `${min}%~${max}%`;
+    maxD = (hp * max / 100 / 1e8).toFixed(2);
+  }
+
+  html += `<tr>
+    <td>${label}</td>
+    <td>${percentRange}</td>
+    <td>${minD}억 ~ ${maxD}억</td>
+  </tr>`;
+});
+
+  html += '</table>';
+  thresholdArea.innerHTML = html;
+  thresholdArea.style.display = 'block';     // 보여주기
+  // resultArea.style.display = 'none';         // 결과 숨기기
+}
+
+  // 4. 이벤트 바인딩
+  raidSel.addEventListener('change', updateDifficulties);
+  diffSel.addEventListener('change', updateGates);
+  gateSel.addEventListener('change', updateHp);
+  calculateBtn.addEventListener('click', calculateContribution);
+  thresholdBtn.addEventListener('click', showThresholds);
+});
+</script>
+
+<style>
+  #calculator-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  #calculator-container h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 20px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 8px;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s ease;
+  }
+
+  select:focus, input[type="number"]:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+  }
+
+  button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    margin: 16px 8px 0 0;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+
+  button:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  #result-area, #threshold-area {
+    margin-top: 24px;
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    border: 1px solid #ddd;
+  }
+
+  #threshold-area table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #threshold-area th, #threshold-area td {
+    border: 1px solid #e9ecef;
+    padding: 12px;
+    text-align: center;
+  }
+
+  #threshold-area th {
+    background: #f1f1f1;
+    font-weight: 600;
+  }
+
+  .grade-cell-투사 {
+    color: #6c757d;
+    font-weight: bold;
+  }
+
+  .grade-cell-강직한-투사 {
+    color: #17a2b8;
+    font-weight: bold;
+  }
+
+  .grade-cell-잔혹한-혈투사 {
+    color: #dc3545;
+    font-weight: bold;
+  }
+
+  @media (max-width: 600px) {
+    #calculator-container {
+      padding: 16px;
+    }
+    button {
+      width: 100%;
+      margin: 8px 0;
+    }
+  }
+
+</style>
