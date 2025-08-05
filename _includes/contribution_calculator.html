@@ -1,7 +1,8 @@
 <!-- _includes/contribution_calculator.html -->
 <div id="calculator-container">
   <h2>보스 선택</h2>
-  <select id="raid-select"><option>레이드 선택</option></select>
+  <select id="raid-type-select"><option>레이드 유형 선택</option></select>
+  <select id="raid-name-select"><option>레이드 이름 선택</option></select>
   <select id="difficulty-select"><option>난이도 선택</option></select>
   <select id="gate-select"><option>관문 선택</option></select>
 
@@ -26,14 +27,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // 1. 데이터 파싱 및 요소 참조
+  //  데이터 파싱 및 요소 참조
   let bossData = {};
   try {
     bossData = JSON.parse(document.getElementById('boss-data').textContent);
   } catch (e) {
     console.error('bossData parsing error:', e);
   }
-  const raidSel      = document.getElementById('raid-select');
+  const typeSel      = document.getElementById('raid-type-select');
+  const nameSel      = document.getElementById('raid-name-select');
   const diffSel      = document.getElementById('difficulty-select');
   const gateSel      = document.getElementById('gate-select');
   const hpInput      = document.getElementById('boss-hp');
@@ -44,20 +46,34 @@ document.addEventListener('DOMContentLoaded', function() {
   const resultArea   = document.getElementById('result-area');
   const thresholdArea= document.getElementById('threshold-area');
 
-  // 2. 레이드 목록 초기화
-  Object.keys(bossData).forEach(function(raid) {
+  //  레이드 유형 초기화
+  Object.keys(bossData).forEach(function(type) {
     const opt = document.createElement('option');
-    opt.value = raid; opt.innerText = raid;
-    raidSel.appendChild(opt);
+    opt.value = type; opt.innerText = type;
+    typeSel.appendChild(opt);
   });
 
-  // 3. 함수 정의
+  // 함수 정의
+  function updateRaidNames() {
+    nameSel.innerHTML = '<option>레이드 이름 선택</option>';
+    diffSel.innerHTML = '<option>난이도 선택</option>';
+    gateSel.innerHTML = '<option>관문 선택</option>';
+    const type = typeSel.value;
+    if (!bossData[type]) return;
+    Object.keys(bossData[type]).forEach(function(name) {
+      const opt = document.createElement('option');
+      opt.value = name; opt.innerText = name;
+      nameSel.appendChild(opt);
+    });
+  }
+
   function updateDifficulties() {
     diffSel.innerHTML = '<option>난이도 선택</option>';
     gateSel.innerHTML = '<option>관문 선택</option>';
-    const raid = raidSel.value;
-    if (!bossData[raid]) return;
-    Object.keys(bossData[raid]).forEach(function(diff) {
+    const type = typeSel.value;
+    const name = nameSel.value;
+    if (!bossData[type] || !bossData[type][name]) return;
+    Object.keys(bossData[type][name].difficulties).forEach(function(diff) {
       const opt = document.createElement('option');
       opt.value = diff; opt.innerText = diff;
       diffSel.appendChild(opt);
@@ -66,14 +82,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function updateGates() {
     gateSel.innerHTML = '<option>관문 선택</option>';
-    const raid = raidSel.value;
+    const type = typeSel.value;
+    const name = nameSel.value;
     const diff = diffSel.value;
-    if (!bossData[raid] || !bossData[raid][diff]) return;
-    bossData[raid][diff].forEach(function(g) {
+    if (!bossData[type] || !bossData[type][name] || !bossData[type][name].difficulties[diff]) return;
+    const hpData = bossData[type][name].difficulties[diff].hp;
+    if (typeof hpData === 'object') {
+      Object.keys(hpData).forEach(function(gate) {
+        const opt = document.createElement('option');
+        opt.value = hpData[gate]; opt.innerText = gate + ' (' + hpData[gate] + '억)';
+        gateSel.appendChild(opt);
+      });
+    } else {
       const opt = document.createElement('option');
-      opt.value = g.hp; opt.innerText = g.gate + ' (' + g.hp + '억)';
+      opt.value = hpData; opt.innerText = diff + ' (' + hpData + '억)';
       gateSel.appendChild(opt);
-    });
+    }
   }
 
   function updateHp() {
@@ -86,76 +110,84 @@ document.addEventListener('DOMContentLoaded', function() {
     const party = parseInt(partySel.value);
     if (!hp || !dmg) return alert('모든 값을 입력하세요.');
     const pct = dmg/hp*100;
-    const thr = {4:{투사:[0,29],강직한_투사:[30,39],잔혹한_혈투사:[40,100]},
-                 8:{투사:[0,14],강직한_투사:[15,19],잔혹한_혈투사:[20,100]},
-                 16:{투사:[0,7],강직한_투사:[8,10],잔혹한_혈투사:[11,100]}};
+    const thr = {
+      4:{투사:[0,29],강직한_투사:[30,39],잔혹한_혈투사:[40,100]},
+      8:{투사:[0,14],강직한_투사:[15,19],잔혹한_혈투사:[20,100]},
+      16:{투사:[0,7],강직한_투사:[8,10],잔혹한_혈투사:[11,100]}
+    }[party] || {};
     let grade = '해당 없음';
-    Object.entries(thr[party]||{}).some(function([k,r]) {
+    Object.entries(thr).some(function([k,r]) {
       if (pct>=r[0]&&(r[1]===100||pct<r[1])) { grade = k.replace(/_/g,' '); return true; }
     });
     resultArea.innerHTML = '<h3>결과</h3>기여도: '+pct.toFixed(2)+'%<br>등급: <strong>'+grade+'</strong>';
-  resultArea.style.display = 'block';        // 보여주기
-  //thresholdArea.style.display = 'none';      // 기준점 숨기기
+    resultArea.style.display = 'block';
+    //thresholdArea.style.display = 'none';
   }
 
   function showThresholds() {
-  const hpVal = parseFloat(hpInput.value);
-  const party = parseInt(partySel.value);
-  const raid = raidSel.value;
-  const diff = diffSel.value;
-  const gate = gateSel.value;
+    const hpVal = parseFloat(hpInput.value);
+    const party = parseInt(partySel.value);
+    const type  = typeSel.value;
+    const name  = nameSel.value;
+    const diff  = diffSel.value;
+    const gate  = gateSel.value;
+    if (!type||!name||!diff||!gate) {
+      alert('레이드 유형·이름·난이도·관문을 모두 선택하세요.'); return;
+    }
+    if (!hpVal) return alert('보스 체력을 입력하세요.');
+    const hp = hpVal * 1e8;
+    const thrList = {
+      4: [['투사',0,29],['강직한 투사',30,39],['잔혹한 혈투사',40,100]],
+      8: [['투사',0,14],['강직한 투사',15,19],['잔혹한 혈투사',20,100]],
+      16: [['투사',0,7],['강직한 투사',8,10],['잔혹한 혈투사',11,100]]
+    }[party] || [];
 
-  if (!raid || !diff || !gate) {
-    alert('레이드, 난이도, 관문을 모두 선택하세요.');
-    return;
+    let html = `
+      <div class="threshold-card">
+        <div class="threshold-header">
+          <span class="badge">기준점</span>
+          <h3>${type} • ${name} • ${diff}</h3>
+          <div class="threshold-meta">
+            <span>관문: <strong>${gate}</strong></span>
+            <span>파티: <strong>${party}인</strong></span>
+            <span>체력: <strong>${hpVal.toLocaleString()}억</strong></span>
+          </div>
+        </div>
+        <table class="threshold-table">
+          <thead><tr><th>등급</th><th>퍼센트</th><th>데미지(억)</th></tr></thead>
+          <tbody>
+    `;
+    thrList.forEach(function(r) {
+      const [label,min,max] = r;
+      const minD = (hp*min/100/1e8).toFixed(2);
+      let percentText = `${min}%~${max===100?'100%':max+'%'}`;
+      let damageText  = max===100
+        ? `${hpVal.toLocaleString()}억`
+        : `${minD}억 ~ ${(hp*max/100/1e8).toFixed(2)}억`;
+      html += `
+        <tr>
+          <td class="grade-cell grade-${label.replace(/\s+/g,'-')}">${label}</td>
+          <td>${percentText}</td>
+          <td>${damageText}</td>
+        </tr>
+      `;
+    });
+    html += `</tbody></table></div>`;
+    thresholdArea.innerHTML = html;
+    thresholdArea.style.display = 'block';
+    //resultArea.style.display = 'none';
   }
-  if (!hpVal) return alert('보스 체력을 입력하세요.');
 
-  const hp = hpVal * 1e8;
-  const thrList = {
-    4: [['투사',0,29],['강직한 투사',30,39],['잔혹한 혈투사',40,100]],
-    8: [['투사',0,14],['강직한 투사',15,19],['잔혹한 혈투사',20,100]],
-    16: [['투사',0,7],['강직한 투사',8,10],['잔혹한 혈투사',11,100]]
-  }[party] || [];
-
-  // 타이틀 라인 추가
-  let html = `<h3>기준점 : ${raid} / ${diff} / ${gate}관문 / ${party}인 / ${hpVal.toLocaleString()}억</h3>`;
-  html += '<table><tr><th>등급</th><th>퍼센트</th><th>데미지(억)</th></tr>';
-
-  thrList.forEach(function(r) {
-  const [label, min, max] = r;
-  const minD = (hp * min / 100 / 1e8).toFixed(2);
-  let percentRange, maxD;
-
-  if (max === 100) {
-    percentRange = `${min}%~${max}%`;
-    maxD = hpVal.toLocaleString();  // 보스 최대 체력(억)
-  } else {
-    percentRange = `${min}%~${max}%`;
-    maxD = (hp * max / 100 / 1e8).toFixed(2);
-  }
-
-  html += `<tr>
-    <td>${label}</td>
-    <td>${percentRange}</td>
-    <td>${minD}억 ~ ${maxD}억</td>
-  </tr>`;
-});
-
-  html += '</table>';
-  thresholdArea.innerHTML = html;
-  thresholdArea.style.display = 'block';     // 보여주기
-  // resultArea.style.display = 'none';         // 결과 숨기기
-}
-
-  // 4. 이벤트 바인딩
-  raidSel.addEventListener('change', updateDifficulties);
+  //  이벤트 바인딩
+  typeSel.addEventListener('change', updateRaidNames);
+  nameSel.addEventListener('change', updateDifficulties);
   diffSel.addEventListener('change', updateGates);
   gateSel.addEventListener('change', updateHp);
   calculateBtn.addEventListener('click', calculateContribution);
   thresholdBtn.addEventListener('click', showThresholds);
 });
 </script>
+
 
 <style>
   #calculator-container {
