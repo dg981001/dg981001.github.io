@@ -4,10 +4,10 @@ description: |
   Create new idea!
   물리와 수학을 복전하며 프로그래밍을 공부하는 사범대생
 baseurl: ''
-url: 'https://lk-lab.github.com'
+url: 'https://dg981001.github.com'
 timezone: Asia/Seoul 
 
-repository: LK-LAB/lk-lab.github.io
+repository: dg981001/dg981001.github.io
 
 permalink: /:year/:month/:day/:title/
 
