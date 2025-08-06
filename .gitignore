@@ -4,3 +4,5 @@ _site
 .jekyll-metadata
 .idea
 .ruby-version
+_includes/contribution_calculator_origin.html
+_includes/contribution_calculator2.html
